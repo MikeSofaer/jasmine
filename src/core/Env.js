@@ -232,7 +232,17 @@ getJasmineRequireObj().Env = function(j$) {
 
       var declarationError = null;
       try {
-        specDefinitions.call(suite);
+        if (typeof(description) == "object") {
+          if ( jasmine.getGlobal().define && jasmine.getGlobal().define.amd) {
+            jasmine.getGlobal().require(description, function(modules){
+              specDefinitions.apply(suite, modules);
+            });
+          } else {
+            throw "You can't test a module without define.amd set on the global object";
+          }
+        } else {
+          specDefinitions.call(suite);
+        }
       } catch (e) {
         declarationError = e;
       }
