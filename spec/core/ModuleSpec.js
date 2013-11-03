@@ -3,15 +3,8 @@ describe('Suite', function() {
   var env;
 
   beforeEach(function() {
-    env = new jasmine.Env();
-    env.updateInterval = 0;
-
-    fakeTimer = new jasmine.FakeTimer();
-    env.setTimeout = fakeTimer.setTimeout;
-    env.clearTimeout = fakeTimer.clearTimeout;
-    env.setInterval = fakeTimer.setInterval;
-    env.clearInterval = fakeTimer.clearInterval;
-  });
+    env = new j$.Env();
+ });
 
   describe('Modules', function () {
       describe("when there is no module loader", function(){
@@ -23,10 +16,11 @@ describe('Suite', function() {
               });
           });
           it("should fail", function(){
-            env.execute();
-            var result = this.suite.specs()[0].results().getItems()[0];
-            expect(result.passed()).toEqual(false);
-            expect(result.message).toEqual("You can't test a module without define.amd set on the global object");
+              env.execute(function(){
+                  var result = this.suite.children[0].result;
+                  expect(result.status).toEqual("failed");
+                  expect(result.message).toEqual("You can't test a module without define.amd set on the global object");
+              });
           });
       });
       describe("when there is a module loader", function(){
@@ -34,8 +28,8 @@ describe('Suite', function() {
           beforeEach(function() {
               jasmine.getGlobal().define = {amd: true};
               jasmine.getGlobal().require = function(modules, callback){
-                var fakeModules = [6, 7];
-                callback.call(undefined, fakeModules);
+                  var fakeModules = [6, 7];
+                  callback.call(undefined, fakeModules);
               }
 
               this.suite = env.describe(["six", "seven"], function (six, seven) {
@@ -50,12 +44,12 @@ describe('Suite', function() {
             jasmine.getGlobal.require = o_require;
           });
           it("should pass", function(){
-            env.execute();
-            var result = this.suite.specs()[0].results().getItems()[0];
-            expect(result.passed()).toEqual(true);
-            expect(result.message).toEqual("Passed.");
+            env.execute(function(){
+                var result = this.suite.children[0].result;
+                expect(result.status).toEqual("passed");
+                expect(result.message).toEqual("Passed.");
+            })
           })
-
       })
   });
 });
